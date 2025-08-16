@@ -114,7 +114,7 @@ const sendBookingConfirmationEmail = inngest.createFunction(
             to: booking.user.email,
             subject: `Payment Confirmation: "${booking.show.movie.title}" booked!`,
             body: bookingConfirmationTemplate({
-                logoUrl: `https://raw.githubusercontent.com/AbhisekDas01/Quick-Show-Movie-App/bd8d1013fb6b85d285d89e8b25b72079ec427a88/client/src/assets/logo.svg`,
+                logoUrl: `https://raw.githubusercontent.com/AbhisekDas01/Quick-Show-Movie-App/refs/heads/main/client/src/assets/logo.png`,
                 posterUrl: `${TMDB_IMAGE_BASE_URL}${booking?.show?.movie?.poster_path}`,
                 movieTitle: booking.show.movie.title,
                 dateTimeText: formatDateTime(booking.show.showDateTime),
