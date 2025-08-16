@@ -6,7 +6,9 @@ export const bookingConfirmationTemplate = ({
     theaterName,
     seatsText,
     totalText,
-    userName 
+    userName,
+    year,   // added
+    genre   // added
 }) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -73,7 +75,9 @@ export const bookingConfirmationTemplate = ({
                   </td>
                   <td class="stack text-center-sm" valign="top" style="padding-left:20px;">
                     <h2 style="margin:0 0 6px; color:#ffffff; font-size:18px; line-height:1.4; font-weight:600;">${movieTitle}</h2>
-                    <p style="margin:6px 0 0; color:#888888; font-size:14px; line-height:1.6;"></p>
+                    <p style="margin:6px 0 0; color:#888888; font-size:14px; line-height:1.6;">
+                      ${[year, genre].filter(Boolean).join(' | ')}
+                    </p>
                   </td>
                 </tr>
               </table>

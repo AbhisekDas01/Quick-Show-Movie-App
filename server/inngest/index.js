@@ -120,7 +120,9 @@ const sendBookingConfirmationEmail = inngest.createFunction(
                 dateTimeText: formatDateTime(booking.show.showDateTime),
                 seatsText: booking.bookedSeats.join(', '),
                 userName: booking.user.name,
-                totalText: booking.show.showPrice * booking.bookedSeats.length
+                totalText: booking.show.showPrice * booking.bookedSeats.length,
+                year: new Date(booking.show.movie.release_date).getFullYear(),
+                genre: booking.show.movie.genres.slice(0,3).map(({name}) => name).join(', ')
             })
         })
 
