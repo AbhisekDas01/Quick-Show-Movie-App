@@ -114,8 +114,8 @@ const SeatLayout = () => {
         await razorpayPaymentHandler(data.order , {
           axios ,
           getToken,
-          onSuccess: () => navigate('/my-bookings' , {replace: true}),
-          onFailure: () => navigate('/my-bookings')
+          onSuccess: () => navigate('/loading/my-bookings' , {replace: true}),
+          onFailure: () => navigate('/loading/my-bookings')
 
         });
       }else{

@@ -3,6 +3,7 @@ import Booking from "../models/Booking.model.js"
 import Razorpay from "razorpay";
 import { RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY } from "../config/env.js";
 import crypto from 'crypto';
+import { inngest } from "../inngest/index.js";
 
 
 
@@ -80,6 +81,7 @@ export const createBooking = async (req, res) => {
         const options = {
             amount: booking.amount * 100, //the amount is stored in the paise format
             currency: "INR",
+            expire_by: Math.floor(Date.now() / 1000) + (10 *60),
             notes: {
                 bookingId: booking._id.toString()
             }
@@ -90,6 +92,15 @@ export const createBooking = async (req, res) => {
         booking.order = order;
         await booking.save();
 
+
+        //inngest event to cancel the booking
+        await inngest.send({
+            name: 'app/checkpayment',
+            data: {
+                bookingId: booking._id.toString()
+            }
+            
+        })
 
 
 
