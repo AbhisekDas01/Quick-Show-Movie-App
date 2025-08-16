@@ -119,7 +119,8 @@ const sendBookingConfirmationEmail = inngest.createFunction(
                 movieTitle: booking.show.movie.title,
                 dateTimeText: formatDateTime(booking.show.showDateTime),
                 seatsText: booking.bookedSeats.join(', '),
-                userName: booking.user.name
+                userName: booking.user.name,
+                totalText: booking.show.showPrice * booking.bookedSeats.length
             })
         })
 
