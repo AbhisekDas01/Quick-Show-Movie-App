@@ -177,6 +177,12 @@ export const verifyPaymentStatus = async (req, res) => {
             booking.order = { ...booking.order, status: "paid", razorpay_order_id, razorpay_payment_id, razorpay_signature };
             await booking.save();
 
+            //send email confromation
+            await inngest.send({
+                name: 'app/show.booked',
+                data: {bookingId}
+            })
+
             res.json({
                 success: true,
                 message: "Payment Successfull!"

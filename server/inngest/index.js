@@ -1,7 +1,11 @@
+import sendEmail from "../config/nodeMailer.js";
 import Booking from "../models/Booking.model.js";
 import Show from "../models/Show.model.js";
 import User from "../models/User.model.js";
 import { Inngest } from "inngest";
+import { bookingConfirmationTemplate } from "../utils/emailTemplate.js";
+import formatDateTime from "../utils/formatDateTime.js";
+import { TMDB_IMAGE_BASE_URL } from "../config/env.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "movie-ticket-booking" });
@@ -92,10 +96,42 @@ const releaseSeatsDeleteBooking = inngest.createFunction(
 
 )
 
+//Inngest function to send email when user books a show
+const sendBookingConfirmationEmail = inngest.createFunction(
+    {id: 'send-booking-confirmation-email'},
+    {event: 'app/show.booked'},
+    async ({event , step}) => {
+        const {bookingId} = event.data;
+
+        const booking = await Booking.findById(bookingId).populate({
+            path: 'show',
+            populate: {path: 'movie' , model: 'Movie'}
+        }).populate('user');
+
+
+        await sendEmail({
+
+            to: booking.user.email,
+            subject: `Payment Confirmation: "${booking.show.movie.title}" booked!`,
+            body: bookingConfirmationTemplate({
+                logoUrl: `https://raw.githubusercontent.com/AbhisekDas01/Quick-Show-Movie-App/bd8d1013fb6b85d285d89e8b25b72079ec427a88/client/src/assets/logo.svg`,
+                posterUrl: `${TMDB_IMAGE_BASE_URL}${booking?.show?.movie?.poster_path}`,
+                movieTitle: booking.show.movie.title,
+                dateTimeText: formatDateTime(booking.show.showDateTime),
+                seatsText: booking.bookedSeats.join(', '),
+                userName: booking.user.name
+            })
+        })
+
+    }
+)
+
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
     syncUserCreation,
     syncUserDeletion,
     syncUserUpdation,
-    releaseSeatsDeleteBooking
+    releaseSeatsDeleteBooking,
+    sendBookingConfirmationEmail
 ];
