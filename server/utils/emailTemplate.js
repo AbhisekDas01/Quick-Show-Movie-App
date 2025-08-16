@@ -27,7 +27,8 @@ export const bookingConfirmationTemplate = ({
       .stack { display: block !important; width: 100% !important; }
       .text-center-sm { text-align: center !important; }
       .mt-16-sm { margin-top: 16px !important; }
-      .poster { width: 120px !important; height: auto !important; }
+      .poster { width: 120px !important; height: auto !important; margin: 0 auto 16px !important; } /* center poster */
+      td.text-center-sm { padding-left: 0 !important; } /* remove left padding on title/genre cell */
     }
     body { margin:0; padding:20px; background:#0d0d0d; font-family: Arial, Helvetica, sans-serif; }
     .container { max-width:600px; margin:0 auto; background:#1a1a1a; border-radius:12px; overflow:hidden; }
