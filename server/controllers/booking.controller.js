@@ -32,11 +32,16 @@ const checkSeatsAvailability = async (showId, selectedSeats) => {
 
 
 export const createBooking = async (req, res) => {
+
+    const { showId, selectedSeats } = req.body;
+    let booking = null;
+    let showData = null;
+
     try {
 
         const { userId } = req.auth();
 
-        const { showId, selectedSeats } = req.body;
+
         const { origin } = req.headers;
 
         //check if the seat is available for the selected show 
@@ -50,14 +55,32 @@ export const createBooking = async (req, res) => {
         }
 
         //get the show details
-        const showData = await Show.findById(showId).populate('movie');
+        showData = await Show.findById(showId).populate('movie');
+
+        //Create a new booking
+        booking = await Booking.create({
+            user: userId,
+            show: showId,
+            amount: showData.showPrice * selectedSeats.length,
+            bookedSeats: selectedSeats,
+        })
+
+
+
+        selectedSeats.map((seat) => {
+            showData.occupiedSeats[seat] = userId
+        })
+
+        showData.markModified('occupiedSeats');
+
+        await showData.save();
 
         //Razerpay Gateway
         //razorpay instance
         const razorpayInstance = new Razorpay({
             key_id: RAZORPAY_KEY_ID,
             key_secret: RAZORPAY_SECRET_KEY
-        })
+        });
 
         //create an order
         const options = {
@@ -70,25 +93,8 @@ export const createBooking = async (req, res) => {
         }
 
         const order = await razorpayInstance.orders.create(options);
-
-        //Create a new booking
-        const booking = await Booking.create({
-            user: userId,
-            show: showId,
-            amount: showData.showPrice * selectedSeats.length,
-            bookedSeats: selectedSeats,
-            order: order
-        })
-
-
-
-        selectedSeats.map((seat) => {
-            showData.occupiedSeats[seat] = userId
-        })
-
-        showData.markModified('occupiedSeats');
-        await showData.save();
-
+        booking.order = order;
+        await booking.save();
 
 
         //inngest event to cancel the booking
@@ -110,10 +116,32 @@ export const createBooking = async (req, res) => {
     } catch (error) {
 
         console.log("Error while creating: ", error);
-        res.json({
+
+        //rollback the selected seats
+        try {
+
+            if (showData) {
+                selectedSeats.forEach((seat) => {
+                    if (showData.occupiedSeats?.[seat]) {
+                        delete showData.occupiedSeats[seat];
+                    }
+                });
+                showData.markModified('occupiedSeats'); 
+                await showData.save();
+            }
+
+            if (booking?._id) {
+                await Booking.findByIdAndDelete(booking._id); 
+            }
+
+        } catch (rollbackErr) {
+            console.error('Rollback failed:', rollbackErr);
+        }
+
+        return res.json({
             success: false,
-            message: error.message
-        })
+            message: error.message || "Error while booking!"
+        });
 
     }
 }
@@ -146,7 +174,7 @@ export const verifyPaymentStatus = async (req, res) => {
 
             //update payment status on the database
             booking.isPaid = true;
-            booking.order = { ...booking.order, status: "paid" ,  razorpay_order_id, razorpay_payment_id, razorpay_signature };
+            booking.order = { ...booking.order, status: "paid", razorpay_order_id, razorpay_payment_id, razorpay_signature };
             await booking.save();
 
             res.json({
