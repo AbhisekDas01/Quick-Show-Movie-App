@@ -52,24 +52,6 @@ export const createBooking = async (req, res) => {
         //get the show details
         const showData = await Show.findById(showId).populate('movie');
 
-        //Create a new booking
-        const booking = await Booking.create({
-            user: userId,
-            show: showId,
-            amount: showData.showPrice * selectedSeats.length,
-            bookedSeats: selectedSeats,
-        })
-
-
-
-        selectedSeats.map((seat) => {
-            showData.occupiedSeats[seat] = userId
-        })
-
-        showData.markModified('occupiedSeats');
-
-        await showData.save();
-
         //Razerpay Gateway
         //razorpay instance
         const razorpayInstance = new Razorpay({
@@ -81,7 +63,6 @@ export const createBooking = async (req, res) => {
         const options = {
             amount: booking.amount * 100, //the amount is stored in the paise format
             currency: "INR",
-            expire_by: Math.floor(Date.now() / 1000) + (10 *60),
             notes: {
                 bookingId: booking._id.toString()
             }
@@ -89,8 +70,25 @@ export const createBooking = async (req, res) => {
         }
 
         const order = await razorpayInstance.orders.create(options);
-        booking.order = order;
-        await booking.save();
+
+        //Create a new booking
+        const booking = await Booking.create({
+            user: userId,
+            show: showId,
+            amount: showData.showPrice * selectedSeats.length,
+            bookedSeats: selectedSeats,
+            order: order
+        })
+
+
+
+        selectedSeats.map((seat) => {
+            showData.occupiedSeats[seat] = userId
+        })
+
+        showData.markModified('occupiedSeats');
+        await showData.save();
+
 
 
         //inngest event to cancel the booking
@@ -99,7 +97,7 @@ export const createBooking = async (req, res) => {
             data: {
                 bookingId: booking._id.toString()
             }
-            
+
         })
 
 
@@ -111,7 +109,7 @@ export const createBooking = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Error while creating: ", error.message);
+        console.log("Error while creating: ", error);
         res.json({
             success: false,
             message: error.message
