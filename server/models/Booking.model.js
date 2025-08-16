@@ -23,10 +23,7 @@ const bookingSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    paymentLink: {
-        type: String,
-
-    }
+    order: mongoose.Schema.Types.Mixed,
 } , {timestamps: true});
 
 const Booking = mongoose.model("Booking" , bookingSchema);

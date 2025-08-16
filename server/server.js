@@ -39,5 +39,5 @@ app.use('/api/user' , userRouter);
 
 app.listen(port , () => {
 
-    console.log(`Server is running :http://localhost:${port}`);
+    console.log(`Server is running http://localhost:${port}`);
 })

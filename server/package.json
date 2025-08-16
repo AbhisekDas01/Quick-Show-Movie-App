@@ -19,7 +19,8 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "inngest": "^3.40.1",
-    "mongoose": "^8.17.0"
+    "mongoose": "^8.17.0",
+    "razorpay": "^2.9.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

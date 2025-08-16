@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { replace, useNavigate, useParams } from 'react-router-dom'
 import { assets, dummyDateTimeData, dummyShowsData } from '../assets/assets';
 
 import toast from 'react-hot-toast'
@@ -8,6 +8,8 @@ import { ArrowRightIcon, ClockIcon } from 'lucide-react'
 import Loading from '../components/Loading';
 import isoTimeFormat from '../lib/isoTimeFormat';
 import BlurCircle from '../components/BlurCircle';
+import { useAppContext } from '../context/AppContext';
+import razorpayPaymentHandler from '../lib/razorPaypayment';
 
 const SeatLayout = () => {
 
@@ -18,19 +20,22 @@ const SeatLayout = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedTime, setSelectedTime] = useState(null);
   const [show, setShow] = useState(null);
+  const [occupiedSeats , setOccupiedSeats] = useState([]);
 
   const navigate = useNavigate();
 
+  const { axios, getToken, user } = useAppContext();
+
   const getShow = async () => {
 
-    const show = dummyShowsData.find((show) => show._id === id);
+    try {
+      const {data} = await axios.get(`/api/show/${id}`);
 
-    if (show) {
-
-      setShow({
-        movie: show,
-        dateTime: dummyDateTimeData
-      })
+      if(data.success){
+        setShow(data);
+      }
+    } catch (error) {
+        console.error("Error in seatlayout : " , error);
     }
 
   }
@@ -46,6 +51,10 @@ const SeatLayout = () => {
       return toast('You can only select 5 seats');
     }
 
+    if(occupiedSeats.includes(seatId)) {
+      return toast("This seat is already booked");
+    }
+
     setSelectedSeats(prev => prev.includes(seatId) ? prev.filter(seat => seat !== seatId) : [...prev, seatId]);
   }
 
@@ -57,7 +66,10 @@ const SeatLayout = () => {
             const seatId = `${row}${i + 1}`;
 
             return (
-              <button key={seatId} onClick={() => handleSeatClick(seatId)} className={`h-8 w-8 rounded border border-Primary/60 cursor-pointer ${selectedSeats.includes(seatId) && 'bg-Primary text-white'}`}>
+              <button key={seatId} onClick={() => handleSeatClick(seatId)} className={`h-8 w-8 rounded border border-Primary/60 cursor-pointer 
+              ${selectedSeats.includes(seatId) && 'bg-Primary text-white'}
+              ${occupiedSeats.includes(seatId) && 'opacity-50'}
+              `}>
 
                 {seatId}
 
@@ -69,9 +81,61 @@ const SeatLayout = () => {
     </div>
   )
 
+  const getOccupiedSeats = async () => {
+    try {
+      const {data} = await axios.get(`/api/booking/seats/${selectedTime.showId}`);
+
+      if(data.success){
+        setOccupiedSeats(data.occupiedSeats);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log("Error in get occupied seats : " , error);
+    }
+  }
+
+  const bookTickets = async () => {
+    try {
+      
+      if(!user){
+        return toast.error("Please login to proceed");
+      }
+
+      if(!selectedTime || !selectedSeats.length ) return toast.error("Please select a time and seats");
+
+      const {data} = await axios.post('/api/booking/create', {showId: selectedTime.showId , selectedSeats} , {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+
+      if(data.success){
+        await razorpayPaymentHandler(data.order , {
+          axios ,
+          getToken,
+          onSuccess: () => navigate('/my-bookings' , {replace: true}),
+          onFailure: () => navigate('/my-bookings')
+
+        });
+      }else{
+        toast.error(data.message);
+      }
+      
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   useEffect(() => {
     getShow();
   }, [])
+
+  useEffect(() => {
+    if(selectedTime){
+      getOccupiedSeats();
+    }
+  } , [selectedTime])
 
 
   return show ? (
@@ -127,7 +191,7 @@ const SeatLayout = () => {
           </div>
         </div>
 
-        <button onClick={() => navigate('/my-bookings')} className='flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-Primary hover:bg-Primary-dull transition rounded-full font-medium cursor-pointer active:scale-95'>
+        <button onClick={bookTickets} className='flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-Primary hover:bg-Primary-dull transition rounded-full font-medium cursor-pointer active:scale-95'>
           Proceed to checkout
           <ArrowRightIcon strokeWidth={3} className='w-4 h-4' />
         </button>

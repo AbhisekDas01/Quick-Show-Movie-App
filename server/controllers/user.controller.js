@@ -30,34 +30,34 @@ export const getUserBookings = async (req, res) => {
 }
 
 //API to add favorite list  in Clerk user metadata
-export const updateFavorite = async (req , res) => {
+export const updateFavorite = async (req, res) => {
 
     try {
 
-        const {movieId} = req.body;
+        const { movieId } = req.body;
         const userId = req.auth().userId;
 
 
         const user = await clerkClient.users.getUser(userId);
 
-        if(!user.privateMetadata.favorites){
+        if (!user.privateMetadata.favorites) {
             user.privateMetadata.favorites = [];
         }
 
-        if(!user.privateMetadata.favorites.includes(movieId)){
+        if (!user.privateMetadata.favorites.includes(movieId)) {
             user.privateMetadata.favorites.push(movieId);
-        }else{
+        } else {
             user.privateMetadata.favorites = user.privateMetadata.favorites.filter(item => item != movieId);
         }
 
-        await clerkClient.users.updateUserMetadata(userId , {privateMetadata: user.privateMetadata});
+        await clerkClient.users.updateUserMetadata(userId, { privateMetadata: user.privateMetadata });
 
 
         res.json({
             success: true,
-            message: "Favorite added successfully."
+            message: "Favorite updated successfully."
         })
-        
+
     } catch (error) {
         console.error(error);
         res.json({
@@ -67,16 +67,18 @@ export const updateFavorite = async (req , res) => {
     }
 }
 
-export const getFavorites = async (req , res) => {
+export const getFavorites = async (req, res) => {
     try {
-        
-        const user = await clerkClient.users.getUser(req.auth().userId);
 
-        const favorites = user.privateMetadata.favorites;
+        const { userId } = req.auth();
+
+        const user = await clerkClient.users.getUser(userId);
+
+        const favorites = user?.privateMetadata?.favorites;
 
         //get Movies from database
 
-        const movies = await Movie.find({_id: {$in: favorites}});
+        const movies = favorites?.length ? await Movie.find({ _id: { $in: favorites } }) : [];
 
         res.json({
             success: true,
