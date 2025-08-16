@@ -78,7 +78,7 @@ const releaseSeatsDeleteBooking = inngest.createFunction(
                     delete show.occupiedSeats[seat];
                 });
 
-                show.isModified('occupiedSeats');
+                show.markModified('occupiedSeats');
                 await show.save();
 
                 //delete booking
