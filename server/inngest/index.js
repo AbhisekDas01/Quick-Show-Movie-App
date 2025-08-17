@@ -145,7 +145,7 @@ const sendNewShowNotifications = inngest.createFunction(
 
             await sendEmail({
                 to: user.email,
-                subject: ``,
+                subject: `🎬 New Show Added: ${movieTitle}`,
                 body: newShowNotificationTemplate({
                     userName: user.name,
                     movieTitle,
