@@ -97,6 +97,8 @@ export const addShow = async (req, res) => {
                 runtime: movieApiData.runtime
             }
 
+            
+
             //add movie to the DB
             movie = await Movie.create(movieDetails);
 
@@ -121,16 +123,18 @@ export const addShow = async (req, res) => {
             await Show.insertMany(showsToCreate);
         }
 
+        
+
         //inngest function to send email notification 
-        inngest.send({
+        await inngest.send({
             name: 'app/show.added',
             data: {
                 movieId: movieId,
-                movieTitle: movieDetails.title,
-                posterUrl:  TMDB_IMAGE_BASE_URL + movieDetails.poster_path,
-                year: new Date(movieDetails.release_date).getFullYear(),
-                genre: movieDetails.genres.slice(0 , 3).map(({name}) => name).join(", "),
-                description: movieDetails.overview,
+                movieTitle: movie.title,
+                posterUrl:  TMDB_IMAGE_BASE_URL + movie.poster_path,
+                year: new Date(movie.release_date).getFullYear(),
+                genre: movie.genres.slice(0 , 3).map(({name}) => name).join(", "),
+                description: movie.overview,
                 bookingUrl: `${CLIENT_BASE_URL}/movies/${movieId}`
             }
         })
