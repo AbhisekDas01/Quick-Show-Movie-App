@@ -24,6 +24,8 @@ export const newShowNotificationTemplate = ({
       .stack { display: block !important; width: 100% !important; }
       .text-center-sm { text-align: center !important; }
       .poster { width: 120px !important; height: auto !important; margin: 0 auto 16px !important; }
+      td.text-center-sm { padding-left: 0 !important; } /* remove left pad on mobile */
+      .mt-16-sm { margin-top: 16px !important; }        /* add spacing between rows */
       .cta-button { padding: 12px 24px !important; font-size: 16px !important; }
     }
     body { margin:0; padding:0; background:#0d0d0d; font-family: Arial, Helvetica, sans-serif; }
@@ -44,7 +46,7 @@ export const newShowNotificationTemplate = ({
           <!-- Header -->
           <tr>
             <td class="px-32 py-32" style="padding:32px; border-bottom:1px solid #333333; text-align:center;">
-              <img src="https://raw.githubusercontent.com/AbhisekDas01/Quick-Show-Movie-App/bd8d1013fb6b85d285d89e8b25b72079ec427a88/client/src/assets/logo.svg" alt="QuickShow Logo" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; width:150px; height:auto;" />
+              <img src="https://raw.githubusercontent.com/AbhisekDas01/Quick-Show-Movie-App/refs/heads/main/client/src/assets/logo.png" alt="QuickShow Logo" width="150" style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; width:150px; height:auto;" />
               <h1 style="margin:16px 0 6px; color:#ffffff; font-size:24px; line-height:1.3; font-weight:700;">
                  Just Dropped: A New Movie!
               </h1>
@@ -60,7 +62,7 @@ export const newShowNotificationTemplate = ({
                   <td class="stack" valign="top" style="width:140px;">
                     <img class="poster" src="${posterUrl}" alt="Movie Poster" width="120" style="display:block; border-radius:8px; width:120px; height:180px; object-fit:cover; border:0;" />
                   </td>
-                  <td class="stack text-center-sm" valign="top" style="padding-left:20px;">
+                  <td class="stack text-center-sm mt-16-sm" valign="top" style="padding-left:20px;">
                     <h2 style="margin:0 0 6px; color:#ffffff; font-size:18px; line-height:1.4; font-weight:600;">${movieTitle}</h2>
                     <p style="margin:6px 0 0; color:#888888; font-size:14px; line-height:1.6;">${year} | ${genre}</p>
                     <p style="margin:12px 0 0; color:#bbbbbb; font-size:14px; line-height:1.6;">${description}</p>
