@@ -11,6 +11,7 @@ export const {
     SMTP_PASS,
     SMTP_USER,
     SENDER_EMAIL,
-    TMDB_IMAGE_BASE_URL
+    TMDB_IMAGE_BASE_URL,
+    CLIENT_BASE_URL
     
 } = process.env;

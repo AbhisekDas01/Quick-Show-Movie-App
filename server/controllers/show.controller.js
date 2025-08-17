@@ -1,7 +1,8 @@
 import axios from "axios"
-import { TMDB_API_KEY } from "../config/env.js"
+import { CLIENT_BASE_URL, TMDB_API_KEY, TMDB_IMAGE_BASE_URL } from "../config/env.js"
 import Movie from "../models/Movie.model.js";
 import Show from "../models/Show.model.js";
+import { inngest } from "../inngest/index.js";
 
 
 
@@ -119,6 +120,20 @@ export const addShow = async (req, res) => {
         if(showsToCreate.length > 0) {
             await Show.insertMany(showsToCreate);
         }
+
+        //inngest function to send email notification 
+        inngest.send({
+            name: 'app/show.added',
+            data: {
+                movieId: movieId,
+                movieTitle: movieDetails.title,
+                posterUrl:  TMDB_IMAGE_BASE_URL + movieDetails.poster_path,
+                year: new Date(movieDetails.release_date).getFullYear(),
+                genre: movieDetails.genres.slice(0 , 3).map(({name}) => name).join(", "),
+                description: movieDetails.overview,
+                bookingUrl: `${CLIENT_BASE_URL}/movies/${movieId}`
+            }
+        })
 
         res.json({
             success: true,
