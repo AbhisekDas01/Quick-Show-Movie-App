@@ -48,6 +48,9 @@ const movieSchema = new mongoose.Schema({
     runtime: {
         type: Number,
         required: true
+    },
+    trailer_link:{
+        type: String
     }
 
 

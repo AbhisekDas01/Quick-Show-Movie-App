@@ -67,7 +67,7 @@ export const addShow = async (req, res) => {
         if (!movie) {
             //fetch movie details and creditsform TMDB API;
 
-            const [movieDetailsResponse, movieCreditResponse] = await Promise.all([
+            const [movieDetailsResponse, movieCreditResponse , movieTrailer] = await Promise.all([
                 axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
                     headers: {
                         Authorization: `Bearer ${TMDB_API_KEY}`
@@ -77,11 +77,24 @@ export const addShow = async (req, res) => {
                     headers: {
                         Authorization: `Bearer ${TMDB_API_KEY}`
                     }
+                }),
+                axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos` , {
+                    headers: {
+                        Authorization: `Bearer ${TMDB_API_KEY}`
+                    }
                 })
             ]);
 
             const movieApiData = movieDetailsResponse.data;
             const movieCreditData = movieCreditResponse.data;
+            const movieTrailerData = movieTrailer?.data?.results
+            ?.filter(({site , type , official}) => site === 'YouTube' && type==='Trailer' && official)
+            ?.map(({key , published_at}) => ({
+                url: `https://www.youtube.com/watch?v=${key}`,
+                published_at
+            }))
+            ?.sort((a , b) => new Date(b.published_at) - new Date(a.published_at))[0]?.url || null;
+            
             const movieDetails = {
                 _id: movieId,
                 title : movieApiData.title,
@@ -94,7 +107,8 @@ export const addShow = async (req, res) => {
                 original_language: movieApiData.original_language,
                 tagline: movieApiData.tagline || "",
                 vote_average: movieApiData.vote_average,
-                runtime: movieApiData.runtime
+                runtime: movieApiData.runtime,
+                trailer_link: movieTrailerData
             }
 
             
