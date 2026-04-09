@@ -84,7 +84,7 @@ export async function POST(request) {
 
         return NextResponse.json({ success: true, order: booking.order });
     } catch (error) {
-        console.error('Error while creating booking:', error);
+        console.error('Error while creating booking:', error.message);
 
         // Rollback the selected seats
         try {
