@@ -196,6 +196,28 @@ export const getShows = async (req , res) => {
     }
 }
 
+export const getUniversalReleases = async (req, res) => {
+    try {
+        const { data } = await axios.get('https://api.themoviedb.org/3/movie/upcoming', {
+            headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`
+            }
+        });
+
+        res.json({
+            success: true,
+            movies: data.results
+        });
+
+    } catch (error) {
+        console.log("Error in getUniversalReleases", error.message);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 //API to get single show from the data base
 export const getShow = async (req , res) => {
 
@@ -206,7 +228,38 @@ export const getShow = async (req , res) => {
         //get all upcomming shows for the movie
         const shows = await Show.find({movie: movieId , showDateTime: {$gte: new Date()}});
 
-        const movie = await Movie.findById(movieId);
+        let movie = await Movie.findById(movieId);
+
+        // If not in local DB, fetch from TMDB directly (for Universal Releases)
+        if (!movie) {
+            const [movieDetailsResponse, movieCreditResponse, movieTrailer] = await Promise.all([
+                axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, { headers: { Authorization: `Bearer ${TMDB_API_KEY}` } }),
+                axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, { headers: { Authorization: `Bearer ${TMDB_API_KEY}` } }),
+                axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, { headers: { Authorization: `Bearer ${TMDB_API_KEY}` } })
+            ]);
+
+            const movieApiData = movieDetailsResponse.data;
+            const movieCreditData = movieCreditResponse.data;
+            const movieTrailerData = movieTrailer?.data?.results
+                ?.filter(({site, type, official}) => site === 'YouTube' && type === 'Trailer' && official)
+                ?.sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0]?.key;
+
+            movie = {
+                _id: movieId,
+                title: movieApiData.title,
+                overview: movieApiData.overview,
+                poster_path: movieApiData.poster_path,
+                backdrop_path: movieApiData.backdrop_path,
+                genres: movieApiData.genres,
+                casts: movieCreditData.cast,
+                release_date: movieApiData.release_date,
+                original_language: movieApiData.original_language,
+                tagline: movieApiData.tagline || "",
+                vote_average: movieApiData.vote_average,
+                runtime: movieApiData.runtime,
+                trailer_link: movieTrailerData ? `https://www.youtube.com/watch?v=${movieTrailerData}` : null
+            };
+        }
 
         const dateTime = {};
 

@@ -1,13 +1,25 @@
-import React, { useState } from 'react'
-import { dummyTrailers } from '../assets/assets'
+import React, { useState, useEffect } from 'react'
 import ReactPlayer from 'react-player'
 import BlurCircle from './BlurCircle';
 import { PlayCircleIcon } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const TrailerSection = () => {
 
-    const [currentTrailer , setCurrentTrailer] = useState(dummyTrailers[1]);
+    const { shows, image_base_url } = useAppContext();
+    const [currentTrailer, setCurrentTrailer] = useState(null);
 
+    // Extract movies that have a trailer link and a backdrop image
+    // Note: We use Set/Map or simple filter to get unique movies since shows might contain duplicates if it's scheduling
+    const trailerMovies = shows 
+      ? Array.from(new Map(shows.filter(m => m.trailer_link && m.backdrop_path).map(m => [m._id, m])).values()).slice(0, 4)
+      : [];
+
+    useEffect(() => {
+        if (trailerMovies.length > 0 && !currentTrailer) {
+            setCurrentTrailer(trailerMovies[0]);
+        }
+    }, [trailerMovies, currentTrailer]);
 
   return (
     <div className='px-6 md:px-16 lg:px-24 xl:px-44 py-20 overflow-hidden'>
@@ -16,16 +28,42 @@ const TrailerSection = () => {
 
         <div className='relative mt-6'>
             <BlurCircle top='-100px' right='-100px' />
-            <ReactPlayer src={currentTrailer.videoUrl} controls={false} className='mx-auto max-w-full' width="960px" height="540px" />
+            {currentTrailer ? (
+                <div className='mx-auto max-w-full rounded-2xl overflow-hidden shadow-xl shadow-Primary/10' style={{ maxWidth: '960px' }}>
+                    <ReactPlayer 
+                        url={currentTrailer.trailer_link} 
+                        controls={true} 
+                        width="100%" 
+                        height="540px" 
+                        playing={false}
+                    />
+                </div>
+            ) : (
+                <div className="flex items-center justify-center w-full max-w-[960px] mx-auto h-[540px] bg-gray-900 rounded-2xl border border-gray-800">
+                    <p className="text-gray-500">No trailers available at the moment.</p>
+                </div>
+            )}
         </div>
 
-        <div className="group grid grid-cols-4 gap-4 md:gap-8 mt-8 max-w-3xl mx-auto">
+        <div className="group grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-8 max-w-[960px] mx-auto">
 
-            {dummyTrailers.map((trailer) => (
-                <div key={trailer.image} onClick = {() => setCurrentTrailer(trailer)}   className="relative group-hover:not-hover:opacity-50 hover:-translate-y-1 duration-300 transition max-md:h-60 md:max-h-60 cursor-pointer" >
-                    <img src={trailer.image} alt="trailer" className='rounded-lg w-full h-full object-cover brightness-75' />
+            {trailerMovies.map((movie) => (
+                <div 
+                    key={movie._id} 
+                    onClick={() => setCurrentTrailer(movie)}   
+                    className={`relative hover:-translate-y-1 duration-300 transition h-32 md:h-40 cursor-pointer rounded-lg overflow-hidden border-2 ${currentTrailer?._id === movie._id ? 'border-Primary opacity-100 scale-[1.02]' : 'border-transparent opacity-60 hover:opacity-100'}`} 
+                >
+                    <img 
+                        src={`${image_base_url}${movie.backdrop_path}`} 
+                        alt={movie.title} 
+                        className='w-full h-full object-cover brightness-75 hover:brightness-100 transition' 
+                    />
 
-                    <PlayCircleIcon strokeWidth={1.6} className='absolute top-1/2 left-1/2 w-5 md:w-8 h-5 md:h-12 transform -translate-x-1/2 -translate-y-1/2' />
+                    <PlayCircleIcon strokeWidth={1.6} className='absolute top-1/2 left-1/2 w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-md transform -translate-x-1/2 -translate-y-1/2' />
+                    
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 md:p-3 text-xs md:text-sm truncate font-medium text-white">
+                        {movie.title}
+                    </div>
                 </div>
             ))}
 
