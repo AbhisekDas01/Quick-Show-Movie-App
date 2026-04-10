@@ -204,9 +204,29 @@ export const getUniversalReleases = async (req, res) => {
             }
         });
 
+        // Fetch trailers for the first 8 movies to show in the Trailer section
+        const movies = data.results;
+        const moviesWithTrailers = await Promise.all(movies.slice(0, 8).map(async (movie) => {
+            try {
+                const videoRes = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/videos`, { 
+                    headers: { Authorization: `Bearer ${TMDB_API_KEY}` } 
+                });
+                const trailerData = videoRes.data.results
+                    ?.filter(({site, type, official}) => site === 'YouTube' && type === 'Trailer' && official)
+                    ?.sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0]?.key;
+                
+                return {
+                    ...movie,
+                    trailer_link: trailerData ? `https://www.youtube.com/watch?v=${trailerData}` : null
+                };
+            } catch (err) {
+                return { ...movie, trailer_link: null };
+            }
+        }));
+
         res.json({
             success: true,
-            movies: data.results
+            movies: [...moviesWithTrailers, ...movies.slice(8)]
         });
 
     } catch (error) {

@@ -4,8 +4,8 @@
 
 @theme {
 
-    --color-Primary : #F84565;
-    --color-Primary-dull : #D63854;
+    --color-Primary : #2563EB;
+    --color-Primary-dull : #1D4ED8;
 }
 
 *{
@@ -16,7 +16,7 @@
 
 body{
     color: white;
-    background-color: #09090B;
+    background-color: #0A1128;
 }
 
 .no-scrollbar {

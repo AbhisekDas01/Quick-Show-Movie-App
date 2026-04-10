@@ -1,23 +1,18 @@
 import toast from 'react-hot-toast';
 
-
-
 //create a script tag and add it to the dom dynamically
 function loadScript(src) {
     return new Promise((resolve) => {
-        const script = document.createElement('script')
-        script.src = src
-        script.onload = () => {
-            resolve(true)
+        if (window.Razorpay) {
+            return resolve(true);
         }
-        script.onerror = () => {
-            resolve(false)
-        }
-        document.body.appendChild(script)
-    })
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
 }
-
-
 
 const razorpayPaymentHandler = async (order, { axios, getToken, onSuccess, onFailure } = {}) => {
 
@@ -80,7 +75,7 @@ const razorpayPaymentHandler = async (order, { axios, getToken, onSuccess, onFai
             },
 
             "theme": {
-                "color": "#F84565"
+                "color": "#2563EB"
             }
         };
 

@@ -6,14 +6,30 @@ import { useAppContext } from '../context/AppContext';
 
 const TrailerSection = () => {
 
-    const { shows, image_base_url } = useAppContext();
+    const { axios, image_base_url } = useAppContext();
     const [currentTrailer, setCurrentTrailer] = useState(null);
+    const [trailerMovies, setTrailerMovies] = useState([]);
 
-    // Extract movies that have a trailer link and a backdrop image
-    // Note: We use Set/Map or simple filter to get unique movies since shows might contain duplicates if it's scheduling
-    const trailerMovies = shows 
-      ? Array.from(new Map(shows.filter(m => m.trailer_link && m.backdrop_path).map(m => [m._id, m])).values()).slice(0, 4)
-      : [];
+    const fetchUniversalReleaseTrailers = async () => {
+        try {
+            const { data } = await axios.get('/api/show/universal-releases');
+            if(data.success && data.movies) {
+                // Filter only movies with a real trailer link and a backdrop
+                const validTrailers = data.movies
+                   .filter(m => m.trailer_link && m.backdrop_path)
+                   .map(m => ({ ...m, _id: m.id })) // map id to _id so it works consistently
+                   .slice(0, 4);
+                
+                setTrailerMovies(validTrailers);
+            }
+        } catch(error) {
+            console.error("Error fetching trailers", error);
+        }
+    }
+
+    useEffect(() => {
+        fetchUniversalReleaseTrailers();
+    }, []);
 
     useEffect(() => {
         if (trailerMovies.length > 0 && !currentTrailer) {
@@ -24,7 +40,7 @@ const TrailerSection = () => {
   return (
     <div className='px-6 md:px-16 lg:px-24 xl:px-44 py-20 overflow-hidden'>
 
-        <p className='text-gray-300 font-medium text-lg max-w-[960px] mx-auto'>Trailers</p>
+        <p className='text-gray-300 font-medium text-lg max-w-[960px] mx-auto'>Upcoming Release Trailers</p>
 
         <div className='relative mt-6'>
             <BlurCircle top='-100px' right='-100px' />
