@@ -322,3 +322,47 @@ export const getShow = async (req , res) => {
         
     }
 }
+
+//API to search movies from TMDB
+export const searchMovies = async (req, res) => {
+    try {
+        const { query } = req.params;
+        
+        if (!query || query.trim().length === 0) {
+            return res.json({
+                success: true,
+                results: []
+            });
+        }
+
+        const { data } = await axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+                query: query.trim(),
+                include_adult: false,
+                language: 'en-US',
+                page: 1
+            },
+            headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`
+            }
+        });
+
+        // Limit to first 5 results for dropdown
+        const results = data.results.slice(0, 5).map(movie => ({
+            ...movie,
+            _id: movie.id
+        }));
+
+        res.json({
+            success: true,
+            results
+        });
+
+    } catch (error) {
+        console.log("Error in searchMovies", error.message);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+}
