@@ -136,77 +136,10 @@ const SearchDropdown = () => {
         </>
     );
 
+    // On mobile, SearchDropdown shouldn't override the FloatingSearchButton
+    // so we just return null if isMobile is true, letting the FloatingSearchButton handle it.
     if (isMobile) {
-        if (isOpen) {
-            return (
-                <div ref={searchRef} className='fixed inset-0 bg-black/95 z-50 flex flex-col'>
-                    <div className='flex-shrink-0 bg-black/95 px-4 py-4 border-b border-gray-800'>
-                        <div className='flex items-center gap-3'>
-                            <button
-                                onClick={handleClose}
-                                className='p-2 hover:bg-gray-800 rounded-full flex-shrink-0'
-                            >
-                                <ArrowLeft className='w-6 h-6 text-white' />
-                            </button>
-                            <div className='flex-1 flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
-                                <SearchIcon className='w-5 h-5 text-gray-400' />
-                                <input
-                                    type='text'
-                                    placeholder='Search movies...'
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
-                                    autoFocus
-                                />
-                                {searchQuery && (
-                                    <button
-                                        onClick={() => {
-                                            setSearchQuery('');
-                                            setResults([]);
-                                        }}
-                                        className='hover:bg-gray-700 p-1 rounded flex-shrink-0'
-                                    >
-                                        <X className='w-4 h-4 text-gray-400' />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex-1 overflow-y-auto px-4 py-4'>
-                        <ResultsContent />
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div ref={searchRef} className='w-full'>
-                <div className='flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
-                    <SearchIcon className='w-5 h-5 text-gray-400' />
-                    <input 
-                        type='text'
-                        placeholder='Search movies...'
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
-                    />
-                    {loading ? (
-                        <Loader className='w-4 h-4 text-Primary animate-spin' />
-                    ) : searchQuery ? (
-                        <button
-                            onClick={() => {
-                                setSearchQuery('');
-                                setResults([]);
-                                setIsOpen(false);
-                            }}
-                            className='hover:bg-gray-700 p-1 rounded'
-                        >
-                            <X className='w-4 h-4 text-gray-400' />
-                        </button>
-                    ) : null}
-                </div>
-            </div>
-        );
+        return null;
     }
 
     // Desktop dropdown view

@@ -76,17 +76,17 @@ const FloatingSearchButton = () => {
     }
 
     return (
-        <div className='fixed inset-0 bg-black/95 z-50 md:hidden overflow-y-auto pt-20'>
-            <div className='px-4 pb-20'>
-                <div className='flex items-center gap-3 mb-6 sticky top-20 bg-black/95 pt-4'>
+        <div className='fixed inset-0 bg-black/95 z-50 md:hidden flex flex-col'>
+            <div className='flex-shrink-0 bg-black/95 px-4 py-4 border-b border-gray-800'>
+                <div className='flex items-center gap-3'>
                     <button
                         onClick={handleClose}
-                        className='p-2 hover:bg-gray-800 rounded-full'
+                        className='p-2 hover:bg-gray-800 rounded-full flex-shrink-0'
                     >
                         <ArrowLeft className='w-6 h-6 text-white' />
                     </button>
-                    <div className='flex-1 flex items-center gap-2 bg-gray-800/50 px-3 py-2 rounded-lg border border-gray-700'>
-                        <SearchIcon className='w-5 h-5 text-gray-400' />
+                    <div className='flex-1 flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
+                        <SearchIcon className='w-5 h-5 text-gray-400 flex-shrink-0' />
                         <input
                             ref={inputRef}
                             type='text'
@@ -102,14 +102,16 @@ const FloatingSearchButton = () => {
                                     setSearchQuery('');
                                     setResults([]);
                                 }}
-                                className='hover:bg-gray-700 p-1 rounded'
+                                className='hover:bg-gray-700 p-1 rounded flex-shrink-0'
                             >
                                 <X className='w-4 h-4 text-gray-400' />
                             </button>
                         )}
                     </div>
                 </div>
+            </div>
 
+            <div className='flex-1 overflow-y-auto px-4 py-4'>
                 {loading ? (
                     <div className='p-6 text-center'>
                         <div className='flex justify-center items-center gap-2'>
