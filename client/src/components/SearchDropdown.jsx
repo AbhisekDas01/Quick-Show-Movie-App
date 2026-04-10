@@ -127,6 +127,48 @@ const SearchDropdown = () => {
     );
 
     if (isMobile) {
+        if (isOpen) {
+            return (
+                <div ref={searchRef} className='fixed inset-0 bg-black/95 z-50 top-0 left-0 right-0 bottom-0 overflow-y-auto'>
+                    <div className='sticky top-0 bg-black/95 px-4 py-4 z-50 border-b border-gray-800'>
+                        <div className='flex items-center gap-3'>
+                            <button
+                                onClick={handleClose}
+                                className='p-2 hover:bg-gray-800 rounded-full flex-shrink-0'
+                            >
+                                <ArrowLeft className='w-6 h-6 text-white' />
+                            </button>
+                            <div className='flex-1 flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
+                                <SearchIcon className='w-5 h-5 text-gray-400' />
+                                <input
+                                    type='text'
+                                    placeholder='Search movies...'
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
+                                    autoFocus
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setResults([]);
+                                        }}
+                                        className='hover:bg-gray-700 p-1 rounded flex-shrink-0'
+                                    >
+                                        <X className='w-4 h-4 text-gray-400' />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className='px-4 py-4'>
+                        <ResultsContent />
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div ref={searchRef} className='w-full'>
                 <div className='flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
@@ -153,23 +195,6 @@ const SearchDropdown = () => {
                         </button>
                     ) : null}
                 </div>
-
-                {isOpen && (
-                    <div className='fixed inset-0 bg-black/95 z-50 top-0 left-0 right-0 bottom-0 overflow-y-auto pt-16'>
-                        <div className='px-4 pb-20'>
-                            <div className='flex items-center gap-3 mb-6 sticky top-16 bg-black/95 pt-4'>
-                                <button
-                                    onClick={handleClose}
-                                    className='p-2 hover:bg-gray-800 rounded-full'
-                                >
-                                    <ArrowLeft className='w-6 h-6 text-white' />
-                                </button>
-                                <h2 className='text-xl font-semibold text-white'>Search Results</h2>
-                            </div>
-                            <ResultsContent />
-                        </div>
-                    </div>
-                )}
             </div>
         );
     }

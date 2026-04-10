@@ -58,7 +58,7 @@ const FloatingSearchButton = () => {
                     setIsOpen(true);
                     setTimeout(() => inputRef.current?.focus(), 100);
                 }}
-                className='fixed bottom-24 right-6 z-40 bg-Primary hover:bg-Primary-dull p-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:scale-110 duration-200 md:hidden'
+                className='fixed bottom-6 right-6 z-40 bg-Primary hover:bg-Primary-dull p-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:scale-110 duration-200 md:hidden'
             >
                 <SearchIcon className='w-6 h-6 text-white' />
             </button>
