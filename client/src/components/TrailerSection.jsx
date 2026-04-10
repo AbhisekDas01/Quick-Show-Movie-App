@@ -51,7 +51,8 @@ const TrailerSection = () => {
                         controls={true} 
                         width="100%" 
                         height="540px" 
-                        playing={false}
+                        playing={true}
+                        muted={true}
                     />
                 </div>
             ) : (
