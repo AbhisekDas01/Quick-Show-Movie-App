@@ -68,6 +68,16 @@ const SearchDropdown = () => {
         setIsOpen(false);
     }
 
+    // Prevent body scroll when overlay is open on mobile
+    useEffect(() => {
+        if (isMobile && isOpen) {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = 'auto';
+            };
+        }
+    }, [isMobile, isOpen]);
+
     // Close dropdown when clicking outside (desktop only)
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -129,8 +139,8 @@ const SearchDropdown = () => {
     if (isMobile) {
         if (isOpen) {
             return (
-                <div ref={searchRef} className='fixed inset-0 bg-black/95 z-50 top-0 left-0 right-0 bottom-0 overflow-y-auto'>
-                    <div className='sticky top-0 bg-black/95 px-4 py-4 z-50 border-b border-gray-800'>
+                <div ref={searchRef} className='fixed inset-0 bg-black/95 z-50 flex flex-col'>
+                    <div className='flex-shrink-0 bg-black/95 px-4 py-4 border-b border-gray-800'>
                         <div className='flex items-center gap-3'>
                             <button
                                 onClick={handleClose}
@@ -162,7 +172,7 @@ const SearchDropdown = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='px-4 py-4 mt-2'>
+                    <div className='flex-1 overflow-y-auto px-4 py-4'>
                         <ResultsContent />
                     </div>
                 </div>

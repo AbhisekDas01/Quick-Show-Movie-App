@@ -26,6 +26,16 @@ const FloatingSearchButton = () => {
         return () => clearTimeout(debounceTimer);
     }, [searchQuery]);
 
+    // Prevent body scroll when overlay is open
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = 'auto';
+            };
+        }
+    }, [isOpen]);
+
     const performSearch = async () => {
         try {
             setLoading(true);
