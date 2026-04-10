@@ -9,6 +9,7 @@ const TrailerSection = () => {
     const { axios, image_base_url } = useAppContext();
     const [currentTrailer, setCurrentTrailer] = useState(null);
     const [trailerMovies, setTrailerMovies] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchUniversalReleaseTrailers = async () => {
         try {
@@ -20,10 +21,13 @@ const TrailerSection = () => {
                    .map(m => ({ ...m, _id: m.id })) // map id to _id so it works consistently
                    .slice(0, 4);
                 
+                console.log("Trailers loaded:", validTrailers);
                 setTrailerMovies(validTrailers);
             }
         } catch(error) {
             console.error("Error fetching trailers", error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -33,6 +37,7 @@ const TrailerSection = () => {
 
     useEffect(() => {
         if (trailerMovies.length > 0 && !currentTrailer) {
+            console.log("Setting initial trailer:", trailerMovies[0]);
             setCurrentTrailer(trailerMovies[0]);
         }
     }, [trailerMovies, currentTrailer]);
@@ -44,26 +49,23 @@ const TrailerSection = () => {
 
         <div className='relative mt-6'>
             <BlurCircle top='-100px' right='-100px' />
-            {currentTrailer ? (
+            {!loading && currentTrailer && currentTrailer.trailer_link ? (
                 <div className='mx-auto max-w-full rounded-2xl overflow-hidden shadow-xl shadow-Primary/10' style={{ maxWidth: '960px' }}>
-                    <ReactPlayer 
+                    <iframe
                         key={currentTrailer.trailer_link}
-                        url={currentTrailer.trailer_link} 
-                        controls={true} 
-                        width="100%" 
-                        height="540px" 
-                        playing={true}
-                        muted={true}
-                        config={{
-                            youtube: {
-                                playerVars: { showinfo: 1, origin: window.location.origin }
-                            }
-                        }}
+                        src={currentTrailer.trailer_link}
+                        width="100%"
+                        height="540"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title={currentTrailer.title}
+                        className='rounded-lg'
                     />
                 </div>
             ) : (
                 <div className="flex items-center justify-center w-full max-w-[960px] mx-auto h-[540px] bg-gray-900 rounded-2xl border border-gray-800">
-                    <p className="text-gray-500">No trailers available at the moment.</p>
+                    <p className="text-gray-500">{loading ? 'Loading trailers...' : 'No trailers available at the moment.'}</p>
                 </div>
             )}
         </div>
@@ -73,7 +75,10 @@ const TrailerSection = () => {
             {trailerMovies.map((movie) => (
                 <div 
                     key={movie._id} 
-                    onClick={() => setCurrentTrailer(movie)}   
+                    onClick={() => {
+                        console.log("Selecting trailer:", movie);
+                        setCurrentTrailer(movie);
+                    }}
                     className={`relative hover:-translate-y-1 duration-300 transition h-32 md:h-40 cursor-pointer rounded-lg overflow-hidden border-2 ${currentTrailer?._id === movie._id ? 'border-Primary opacity-100 scale-[1.02]' : 'border-transparent opacity-60 hover:opacity-100'}`} 
                 >
                     <img 

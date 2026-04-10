@@ -211,15 +211,25 @@ export const getUniversalReleases = async (req, res) => {
                 const videoRes = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/videos`, { 
                     headers: { Authorization: `Bearer ${TMDB_API_KEY}` } 
                 });
-                const trailerData = videoRes.data.results
-                    ?.filter(({site, type, official}) => site === 'YouTube' && type === 'Trailer' && official)
-                    ?.sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0]?.key;
+                
+                // First try official trailers, then any YouTube trailer
+                let trailerData = videoRes.data.results
+                    ?.filter(({site, type}) => site === 'YouTube' && type === 'Trailer')
+                    ?.sort((a, b) => {
+                        if (a.official && !b.official) return -1;
+                        if (!a.official && b.official) return 1;
+                        return new Date(b.published_at) - new Date(a.published_at);
+                    })[0]?.key;
+                
+                // If no trailer found, return null
+                const trailerLink = trailerData ? `https://www.youtube.com/embed/${trailerData}?autoplay=0&controls=1&modestbranding=1` : null;
                 
                 return {
                     ...movie,
-                    trailer_link: trailerData ? `https://www.youtube.com/watch?v=${trailerData}` : null
+                    trailer_link: trailerLink
                 };
             } catch (err) {
+                console.error(`Error fetching trailer for movie ${movie.id}:`, err.message);
                 return { ...movie, trailer_link: null };
             }
         }));
