@@ -37,9 +37,9 @@ const Navbar = () => {
 
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 lg:gap-8 flex-1 md:flex-none">
+            <div className="hidden md:flex items-center gap-2 md:gap-4 lg:gap-8 flex-1 md:flex-none">
                 <div className='flex-1 md:flex-none min-w-0'>
-                    <SearchDropdown />
+                    <SearchDropdown isMobileFloating={false} />
                 </div>
 
                 {
@@ -56,6 +56,22 @@ const Navbar = () => {
                     )
                 }
                 
+            </div>
+
+            <div className="flex md:hidden items-center gap-2">
+                {
+                    !user ? (
+                        <button onClick={openSignIn} className='px-3 py-1 sm:px-4 sm:py-2 bg-Primary hover:bg-Primary-dull transition rounded-full font-medium cursor-pointer text-xs sm:text-sm'>Login</button>
+                    ) : (
+                        <div className='flex-shrink-0'>
+                            <UserButton>
+                                <UserButton.MenuItems>
+                                    <UserButton.Action label='My bookings' labelIcon={<TicketPlus width={15} />} onClick={() => navigate('/my-bookings')} />
+                                </UserButton.MenuItems>
+                            </UserButton>
+                        </div>
+                    )
+                }
             </div>
 
             <MenuIcon onClick={() => setIsOpen(!isOpen)} className='max-md:ml-2 md:hidden w-6 h-6 cursor-pointer flex-shrink-0' />

@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from './components/Navbar'
+import SearchDropdown from './components/SearchDropdown'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Movies from './pages/Movies'
@@ -28,6 +29,7 @@ const App = () => {
         <>
             <Toaster />
             {!isAdminRoute && <Navbar />}
+            {!isAdminRoute && <div className='md:hidden'><SearchDropdown isMobileFloating={true} /></div>}
 
             <Routes>
                 <Route path='/' element={<Home />} />
