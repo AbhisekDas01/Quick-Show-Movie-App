@@ -29,13 +29,13 @@ const HeroSection = () => {
 
     return (
         <div 
-            className='relative flex flex-col items-start justify-center gap-4 px-6 md:px-16 lg:px-36 bg-cover bg-center h-[90vh] md:h-screen transition-all duration-700'
+            className='relative flex flex-col items-start justify-center gap-4 px-6 md:px-16 lg:px-36 bg-cover bg-center h-[90vh] md:h-screen transition-all duration-700 pt-24 md:pt-0'
             style={{ backgroundImage: `url(${bgImage})` }}
         >
             {/* Added a subtle overlay for better text readability */}
             <div className='absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent'></div>
 
-            <div className='relative z-10 w-full max-w-2xl mt-16 md:mt-24'>
+            <div className='relative z-10 w-full max-w-2xl md:mt-24'>
                 <h1 className='text-4xl md:text-5xl lg:text-[70px] lg:leading-[1.1] font-semibold mb-4 text-white drop-shadow-lg line-clamp-2'>
                     {currentMovie.title}
                 </h1>
