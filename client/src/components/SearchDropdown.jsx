@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SearchIcon, X } from 'lucide-react'
+import { SearchIcon, X, Loader } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 const SearchDropdown = () => {
@@ -17,6 +17,7 @@ const SearchDropdown = () => {
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
             if (searchQuery.trim().length > 0) {
+                setIsOpen(true); // Open dropdown immediately when user types
                 performSearch();
             } else {
                 setResults([]);
@@ -74,7 +75,9 @@ const SearchDropdown = () => {
                     onFocus={() => searchQuery.trim().length > 0 && setIsOpen(true)}
                     className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
                 />
-                {searchQuery && (
+                {loading ? (
+                    <Loader className='w-4 h-4 text-Primary animate-spin' />
+                ) : searchQuery ? (
                     <button
                         onClick={() => {
                             setSearchQuery('');
@@ -85,14 +88,19 @@ const SearchDropdown = () => {
                     >
                         <X className='w-4 h-4 text-gray-400' />
                     </button>
-                )}
+                ) : null}
             </div>
 
-            {isOpen && (
+            {(isOpen || searchQuery.trim().length > 0) && (
                 <div className='absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden'>
                     {loading ? (
-                        <div className='p-4 text-center text-gray-400'>
-                            <p className='text-sm'>Searching...</p>
+                        <div className='p-6 text-center'>
+                            <div className='flex justify-center items-center gap-2'>
+                                <div className='w-2 h-2 bg-Primary rounded-full animate-bounce' style={{animationDelay: '0s'}}></div>
+                                <div className='w-2 h-2 bg-Primary rounded-full animate-bounce' style={{animationDelay: '0.1s'}}></div>
+                                <div className='w-2 h-2 bg-Primary rounded-full animate-bounce' style={{animationDelay: '0.2s'}}></div>
+                            </div>
+                            <p className='text-gray-400 text-sm mt-3'>Searching movies...</p>
                         </div>
                     ) : results.length > 0 ? (
                         <div className='max-h-96 overflow-y-auto'>
