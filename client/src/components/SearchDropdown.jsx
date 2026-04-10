@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { SearchIcon, X, Loader, ArrowLeft } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
-const SearchDropdown = ({ isMobileFloating = false }) => {
+const SearchDropdown = () => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState([]);
@@ -11,7 +11,6 @@ const SearchDropdown = ({ isMobileFloating = false }) => {
     const [loading, setLoading] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const searchRef = useRef(null);
-    const inputRef = useRef(null);
     const navigate = useNavigate();
     const { axios, image_base_url } = useAppContext();
 
@@ -29,13 +28,13 @@ const SearchDropdown = ({ isMobileFloating = false }) => {
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
             if (searchQuery.trim().length > 0) {
-                setIsOpen(true);
+                setIsOpen(true); // Open dropdown immediately when user types
                 performSearch();
             } else {
                 setResults([]);
                 setIsOpen(false);
             }
-        }, 300);
+        }, 300); // 300ms debounce
 
         return () => clearTimeout(debounceTimer);
     }, [searchQuery]);
@@ -93,17 +92,17 @@ const SearchDropdown = ({ isMobileFloating = false }) => {
                     <p className='text-gray-400 text-sm mt-3'>Searching movies...</p>
                 </div>
             ) : results.length > 0 ? (
-                <div className={isMobileFlo || isMobile ? 'space-y-3 p-4' : 'max-h-96 overflow-y-auto'}>
+                <div className={isMobile ? 'space-y-3 p-4' : 'max-h-96 overflow-y-auto'}>
                     {results.map((movie) => (
                         <div
                             key={movie.id}
                             onClick={() => handleMovieSelect(movie._id)}
-                            className={`flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer transition rounded-lg ${!isMobileFloating && !isMobile && 'border-b border-gray-800 last:border-b-0'} ${(isMobileFloating || isMobile) && 'bg-gray-800/50'}`}
+                            className={`flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer transition rounded-lg ${!isMobile && 'border-b border-gray-800 last:border-b-0'} ${isMobile && 'bg-gray-800/50'}`}
                         >
                             <img
                                 src={`${image_base_url}${movie.poster_path || movie.backdrop_path}`}
                                 alt={movie.title}
-                                className={`object-cover rounded ${isMobileFloating || isMobile ? 'w-16 h-24' : 'w-10 h-14'}`}
+                                className={`object-cover rounded ${isMobile ? 'w-16 h-24' : 'w-10 h-14'}`}
                             />
                             <div className='flex-1 min-w-0'>
                                 <p className='text-white font-medium line-clamp-2'>{movie.title}</p>
@@ -127,27 +126,93 @@ const SearchDropdown = ({ isMobileFloating = false }) => {
         </>
     );
 
-    // Floating FAB on mobile
-    if (isMobileFloating && isMobile) {
+    if (isMobile) {
         return (
-            <div ref={searchRef}>
-                {!isOpen ? (
-                    <button
-                        onClick={() => {
-                            setIsOpen(true);
-                            setTimeout(() => inputRef.current?.focus(), 100);
-                        }}
-                        className='fixed bottom-24 right-6 z-40 bg-Primary hover:bg-Primary-dull p-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:scale-110 duration-200'
-                    >
-                        <SearchIcon className='w-6 h-6 text-white' />
-                    </button>
-                ) : (
+            <div ref={searchRef} className='w-full'>
+                <div className='flex items-center gap-2 bg-gray-800/50 px-3 py-2.5 rounded-lg border border-gray-700'>
+                    <SearchIcon className='w-5 h-5 text-gray-400' />
+                    <input 
+                        type='text'
+                        placeholder='Search movies...'
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
+                    />
+                    {loading ? (
+                        <Loader className='w-4 h-4 text-Primary animate-spin' />
+                    ) : searchQuery ? (
+                        <button
+                            onClick={() => {
+                                setSearchQuery('');
+                                setResults([]);
+                                setIsOpen(false);
+                            }}
+                            className='hover:bg-gray-700 p-1 rounded'
+                        >
+                            <X className='w-4 h-4 text-gray-400' />
+                        </button>
+                    ) : null}
+                </div>
+
+                {isOpen && (
                     <div className='fixed inset-0 bg-black/95 z-50 top-0 left-0 right-0 bottom-0 overflow-y-auto pt-16'>
                         <div className='px-4 pb-20'>
                             <div className='flex items-center gap-3 mb-6 sticky top-16 bg-black/95 pt-4'>
                                 <button
                                     onClick={handleClose}
-                                    className='p-2 hover:bg-gray-800 rounded-full flex-shrink-0'
+                                    className='p-2 hover:bg-gray-800 rounded-full'
+                                >
+                                    <ArrowLeft className='w-6 h-6 text-white' />
+                                </button>
+                                <h2 className='text-xl font-semibold text-white'>Search Results</h2>
+                            </div>
+                            <ResultsContent />
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // Desktop dropdown view
+    return (
+        <div ref={searchRef} className='relative w-56 lg:w-72'>
+            <div className='flex items-center gap-2 bg-gray-800/50 px-4 py-2.5 rounded-full border border-gray-700 hover:border-Primary transition'>
+                <SearchIcon className='w-5 h-5 text-gray-400' />
+                <input 
+                    type='text'
+                    placeholder='Search movies...'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => searchQuery.trim().length > 0 && setIsOpen(true)}
+                    className='bg-transparent text-white outline-none placeholder-gray-500 text-sm flex-1'
+                />
+                {loading ? (
+                    <Loader className='w-4 h-4 text-Primary animate-spin' />
+                ) : searchQuery ? (
+                    <button
+                        onClick={() => {
+                            setSearchQuery('');
+                            setResults([]);
+                            setIsOpen(false);
+                        }}
+                        className='hover:bg-gray-700 p-1 rounded'
+                    >
+                        <X className='w-4 h-4 text-gray-400' />
+                    </button>
+                ) : null}
+            </div>
+
+            {(isOpen || searchQuery.trim().length > 0) && (
+                <div className='absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden'>
+                    <ResultsContent />
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default SearchDropdown
                                 >
                                     <ArrowLeft className='w-6 h-6 text-white' />
                                 </button>

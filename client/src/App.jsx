@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from './components/Navbar'
-import SearchDropdown from './components/SearchDropdown'
+import FloatingSearchButton from './components/FloatingSearchButton'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Movies from './pages/Movies'
@@ -29,7 +29,7 @@ const App = () => {
         <>
             <Toaster />
             {!isAdminRoute && <Navbar />}
-            {!isAdminRoute && <div className='md:hidden'><SearchDropdown isMobileFloating={true} /></div>}
+            {!isAdminRoute && <FloatingSearchButton />}
 
             <Routes>
                 <Route path='/' element={<Home />} />
